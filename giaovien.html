@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html>
 <html lang="vi"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Trang giáo viên – Điểm và thống kê Chương 3</title>
+<title>Trang giáo viên – Điểm và thống kê</title>
 <style>
 :root{--bg:#f4f1ea;--card:#fff;--ink:#1f2a37;--line:#cfd6d2;--soft:#e8f1ee;--pri:#0e6b60;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#15171c;--card:#22262e;--ink:#eef1f5;--line:#3b4250;--soft:#2c323c;color-scheme:dark}}
@@ -20,55 +20,75 @@ table{border-collapse:collapse;width:100%}th{font-size:.75rem;text-align:left;op
 .chip{background:#ffe8b0;color:#6b4a00;border-radius:8px;padding:1px 8px;margin:2px;display:inline-block;font-size:.8rem}.err{color:#d6453d;font-weight:bold}
 .pt{font-size:1.15rem;font-weight:bold;color:var(--pri)}.tag{border-radius:8px;padding:1px 8px;font-size:.8rem;font-weight:bold;color:#fff;white-space:nowrap}
 .t1{background:#1e8449}.t2{background:#2e86c1}.t3{background:#d99a1e}.t4{background:#cc4b44}
+.warn{background:#fff6dc;color:#5b4300;border:1px solid #e6c874;border-radius:12px;padding:10px 14px;margin:10px 0}.warn li{margin:3px 0}
 </style></head><body><div id="app"></div>
 <script>
 // Có thể dán sẵn đường dẫn Web App (kết thúc bằng /exec) vào đây, hoặc nhập ở phần Cài đặt cuối trang (chỉ lưu trên máy này).
-const GAS_URL='https://script.google.com/macros/s/AKfycbyLq-mPBlfKQtoAv5dD8Dn08z6afz7fwE162gAHXVI5d7Bfva88tsRF1kn0oTh4fnCFMQ/exec';
-const DN=['','Dạng 1: Góc tam giác','Dạng 2: Tam giác bằng nhau','Dạng 3: Tam giác vuông','Dạng 4: Tam giác cân & Trung trực'];
-const TIP=['','Ôn: tổng ba góc bằng 180°, góc ngoài bằng tổng hai góc trong không kề, phân loại tam giác.','Ôn: ba trường hợp c.c.c, c.g.c, g.c.g; xác định đỉnh, cạnh, góc tương ứng.','Ôn: các trường hợp bằng nhau của tam giác vuông (cạnh huyền – góc nhọn, cạnh huyền – cạnh góc vuông…).','Ôn: tính chất tam giác cân, đều, vuông cân; đường trung trực và cách trình bày chứng minh.'];
-const CC=['#cc4b44','#0e6b60','#d99a1e','#4b6fcc','#8a4bcc','#2d9d78'],D4=[1,2,3,4];
+const GAS_URL='';
+const DN4=['','Dạng 1: Góc tam giác','Dạng 2: Tam giác bằng nhau','Dạng 3: Tam giác vuông','Dạng 4: Tam giác cân & Trung trực'];
+const TIP4=['','Ôn: tổng ba góc bằng 180°, góc ngoài bằng tổng hai góc trong không kề, phân loại tam giác.','Ôn: ba trường hợp c.c.c, c.g.c, g.c.g; xác định đỉnh, cạnh, góc tương ứng.','Ôn: các trường hợp bằng nhau của tam giác vuông (cạnh huyền – góc nhọn, cạnh huyền – cạnh góc vuông…).','Ôn: tính chất tam giác cân, đều, vuông cân; đường trung trực và cách trình bày chứng minh.'];
+const DN5=['','Góc đặc biệt & Tia phân giác','Dấu hiệu nhận biết song song','Tiên đề Euclid & Tính chất','Định lí, GT-KL & Chứng minh','Tổng hợp & Thực tế'];
+const TIP5=['','Ôn: kề bù, đối đỉnh, tia phân giác.','Ôn: dấu hiệu nhận biết hai đường thẳng song song.','Ôn: tiên đề Euclid và tính chất hai đường thẳng song song.','Ôn: giả thiết, kết luận, sắp xếp các bước chứng minh.','Ôn: kẻ đường phụ, chia nhỏ bài toán.'];
+const CC=['#cc4b44','#0e6b60','#d99a1e','#4b6fcc','#8a4bcc','#2d9d78'];
 const $=s=>document.querySelector(s),esc=t=>String(t==null?'':t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const ld=(k,d)=>{try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}};
 const sv=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
 const url=()=>ld('gv_url','')||GAS_URL,fm=n=>String(Math.round((+n||0)*10)/10).replace('.',',');
-let DATA=[],CF='',NQ='',CLS=[],TT='',ST='',AUTO=ld('gv_auto',true),timer=null,BUSY=false;
+let DATA=[],CF='',NQ='',CLS=[],TT='',ST='',N0=null,AUTO=ld('gv_auto',true),timer=null,BUSY=false,ND=4;
+const DN=()=>ND==4?DN4:DN5,TIP=()=>ND==4?TIP4:TIP5,DS=()=>Array.from({length:ND},(_,i)=>i+1);
+// Chuẩn hóa mọi kiểu bản ghi (game "Tam giác bằng nhau" và game cũ) về một dạng chung
+function norm(r){const o={name:String(r.name||'').trim(),cls:String(r.className||r.cls||'').trim(),st:{},nd:0};
+let s=r.total10!=null?+r.total10:(r.score!=null?+r.score:0);if(!(s>=0))s=0;if(s>10)s=s/10;o.score=Math.round(s*10)/10;
+o.stages=+(r.completedStages!=null?r.completedStages:(r.done||0))||0;o.all=!!r.all||o.stages>=4;
+o.c40=r.totalCorrect40;o.qp=r.quizPoints;o.bp=r.bonusPoints;o.xp=+r.xp||0;o.gold=+r.gold||0;o.level=r.chosenLevel||'';
+if(r.topicStats){o.nd=4;for(let d=1;d<=4;d++){const t=r.topicStats[d]||{};o.st[d]={t:+t.total||0,r:+t.right||0}}}
+else if(r.right||r.wrong){o.nd=5;for(let d=1;d<=5;d++){const a=+(r.right&&r.right[d])||0,b=+(r.wrong&&r.wrong[d])||0;o.st[d]={t:a+b,r:a}}}
+return o}
 async function load(){const u=url();if(!u){ST='Hãy nhập đường dẫn Web App và mật khẩu ở phần Cài đặt bên dưới.';return render()}
 if(BUSY)return;BUSY=true;ST='Đang tải…';render();
 try{const r=await fetch(u+(u.includes('?')?'&':'?')+'mk='+encodeURIComponent(ld('gv_pw',''))+'&t='+Date.now()),a=await r.json();
-if(a&&a.error){ST='⚠ '+a.error}else{DATA=Array.isArray(a)?a:[];TT=new Date().toLocaleTimeString('vi-VN');ST=''}}
-catch(e){ST='⚠ Không tải được kết quả. Kiểm tra đường dẫn Web App (quyền “Bất kỳ ai”) và kết nối mạng.'}
+if(a&&a.error){ST='⚠ '+a.error;N0=null}else{DATA=(Array.isArray(a)?a:[]).map(norm).filter(r=>r.name);N0=DATA.length;TT=new Date().toLocaleTimeString('vi-VN');ST=''}}
+catch(e){ST='⚠ Không tải được kết quả. Kiểm tra đường dẫn Web App (quyền “Bất kỳ ai”) và kết nối mạng.';N0=null}
 BUSY=false;render()}
 function setAuto(v){AUTO=v;sv('gv_auto',v);clearInterval(timer);if(v)timer=setInterval(()=>{if(!document.hidden&&document.activeElement.tagName!='INPUT')load()},60000)}
 function saveCfg(){sv('gv_url',$('#gu').value.trim());sv('gv_pw',$('#gp').value);load()}
 function setSz(i,v){const z=ld('gv_sz',{});z[CLS[i]]=Math.max(0,+v||0);sv('gv_sz',z);render()}
 function setNq(v){NQ=v;render();const e=$('#nq');if(e){e.focus();e.setSelectionRange(v.length,v.length)}}
-const fix=r=>Object.assign({},r,{ts:r.topicStats||{}});
-const tot=(r,d)=>(r.ts[d]&&r.ts[d].total)||0,wr=(r,d)=>tot(r,d)-((r.ts[d]&&r.ts[d].right)||0);
-const nq=r=>D4.reduce((s,d)=>s+tot(r,d),0);
+function openTest(){const u=url();if(u)window.open(u+(u.includes('?')?'&':'?')+'mk='+encodeURIComponent(ld('gv_pw','')),'_blank')}
+async function sendTest(){const u=url();if(!u){ST='⚠ Chưa có đường dẫn Web App.';return render()}
+const p={timestamp:new Date().toLocaleString('vi-VN'),name:'Học sinh thử',className:'THỬ',chosenLevel:'Thử nghiệm',completedStages:4,totalCorrect40:30,quizPoints:6,bonusPoints:1.5,total10:7.5,xp:3000,gold:400,weakTopic:'Dạng 2',topicStats:{1:{right:8,total:10},2:{right:6,total:10},3:{right:7,total:10},4:{right:9,total:10}}};
+try{await fetch(u,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(p)})}catch(e){}
+ST='Đã gửi bản ghi thử, đang tải lại…';render();setTimeout(load,3500)}
+const tot=(r,d)=>r.st[d]?r.st[d].t:0,wr=(r,d)=>r.st[d]?r.st[d].t-r.st[d].r:0;
+const nq=r=>DS().reduce((s,d)=>s+tot(r,d),0);
 const rt=(L,d)=>{const t=L.reduce((s,r)=>s+tot(r,d),0),w=L.reduce((s,r)=>s+wr(r,d),0);return t?Math.round(w/t*100):0};
-const done=r=>(+r.completedStages||0)>=4,sc=r=>+r.total10||0;
 const rank=s=>s>=8?['Tốt','t1']:s>=6.5?['Khá','t2']:s>=5?['Đạt','t3']:['Chưa đạt','t4'];
-function weakest(r){let b=0,m=0;D4.forEach(d=>{const t=tot(r,d),p=t?wr(r,d)/t:0;if(wr(r,d)&&p>m){m=p;b=d}});return b?DN[b]+' · '+Math.round(m*100)+'% sai':'Chưa có lỗi sai'}
-function csv(){const A=DATA.map(fix),h=['Họ tên','Lớp','Mức đã chọn','Ải hoàn thành','Đúng/40 câu','Điểm câu hỏi /8','Điểm thưởng /2','Tổng điểm /10','Xếp loại','XP','Vàng','Số câu đã làm','% sai D1','% sai D2','% sai D3','% sai D4','Dạng yếu nhất'];
-const rows=A.map(r=>[r.name,r.className,r.chosenLevel,r.completedStages,r.totalCorrect40,r.quizPoints,r.bonusPoints,r.total10,rank(sc(r))[0],r.xp,r.gold,nq(r),...D4.map(d=>rt([r],d)),weakest(r)]);
+function weakest(r){let b=0,m=0;DS().forEach(d=>{const t=tot(r,d),p=t?wr(r,d)/t:0;if(wr(r,d)&&p>m){m=p;b=d}});return b?DN()[b]+' · '+Math.round(m*100)+'% sai':'Chưa có lỗi sai'}
+function csv(){const h=['Họ tên','Lớp','Ải xong','Đúng/40 câu','Điểm câu hỏi','Điểm thưởng','Tổng điểm /10','Xếp loại','XP','Vàng','Số câu đã làm','Dạng yếu nhất'];
+const rows=DATA.map(r=>[r.name,r.cls,r.stages,r.c40==null?'':r.c40,r.qp==null?'':r.qp,r.bp==null?'':r.bp,r.score,rank(r.score)[0],r.xp,r.gold,nq(r),weakest(r)]);
 const s=[h,...rows].map(r=>r.map(x=>'"'+String(x==null?'':x).replace(/"/g,'""')+'"').join(',')).join('\n'),a=document.createElement('a');
-a.href=URL.createObjectURL(new Blob(['\ufeff'+s],{type:'text/csv;charset=utf-8'}));a.download='bang_diem_chuong3.csv';a.click()}
-function render(){const A=DATA.map(fix),SZ=ld('gv_sz',{});CLS=[...new Set(A.map(r=>r.className))].sort();
-const cl=CF?CLS.filter(c=>c==CF):CLS,fl=A.filter(r=>!CF||r.className==CF),col=c=>CC[CLS.indexOf(c)%CC.length];
-const sz=cl.reduce((s,c)=>s+(+SZ[c]||0),0),pl=fl.length,fin=fl.filter(done),qs=fl.reduce((s,r)=>s+nq(r),0),avg=fin.length?fin.reduce((s,r)=>s+sc(r),0)/fin.length:0,ord=D4.slice().sort((a,b)=>rt(fl,b)-rt(fl,a));
-const best=fl.slice().sort((a,b)=>sc(b)-sc(a))[0];
-const cards=`<div class="tc"><div class="sc"><span class="sn">${pl}${sz?'<small>/'+sz+'</small>':''}</span> em<div class="mut">đã chơi${sz?` (${Math.round(pl/sz*100)}% ${cl.length} lớp)`:' · hãy nhập sĩ số từng lớp'}</div></div><div class="sc"><span class="sn">${fin.length}</span> em<div class="mut">đã đi hết cả 4/4 ải</div></div><div class="sc"><span class="sn">${fm(avg)}<small>/10</small></span><div class="mut">điểm trung bình các em đã hoàn thành</div></div><div class="sc"><span class="sn">${best?fm(sc(best)):'–'}<small>/10</small></span><div class="mut">điểm cao nhất${best?' · '+esc(best.name):''}</div></div><div class="sc"><span class="sn">${qs.toLocaleString('vi-VN')}</span><div class="mut">câu hỏi các em đã tự làm</div></div></div>`;
-const bands=[['Tốt (≥ 8)','t1',r=>sc(r)>=8],['Khá (6,5 – <8)','t2',r=>sc(r)>=6.5&&sc(r)<8],['Đạt (5 – <6,5)','t3',r=>sc(r)>=5&&sc(r)<6.5],['Chưa đạt (<5)','t4',r=>sc(r)<5]];
+a.href=URL.createObjectURL(new Blob(['\ufeff'+s],{type:'text/csv;charset=utf-8'}));a.download='bang_diem.csv';a.click()}
+function render(){const A=DATA,SZ=ld('gv_sz',{});ND=A.some(r=>r.nd==4)?4:A.some(r=>r.nd==5)?5:4;
+CLS=[...new Set(A.map(r=>r.cls))].sort();
+const cl=CF?CLS.filter(c=>c==CF):CLS,fl=A.filter(r=>!CF||r.cls==CF),col=c=>CC[CLS.indexOf(c)%CC.length],D=DS(),DNn=DN(),TIPn=TIP();
+const sz=cl.reduce((s,c)=>s+(+SZ[c]||0),0),pl=fl.length,fin=fl.filter(r=>r.all),qs=fl.reduce((s,r)=>s+nq(r),0),avg=fin.length?fin.reduce((s,r)=>s+r.score,0)/fin.length:0,ord=D.slice().sort((a,b)=>rt(fl,b)-rt(fl,a));
+const best=fl.slice().sort((a,b)=>b.score-a.score)[0];
+let body='';
+if(!A.length){body=`<div class="warn"><b>${N0===0?'Đã kết nối thành công nhưng Google Sheet chưa có dữ liệu học sinh nào.':'Chưa có dữ liệu để hiển thị.'}</b><ul><li>Trong file trò chơi <code>index.html</code>, dòng <code>const GAS_URL = "https://script.google.com/macros/s/AKfycbyl2xohjiPSp3-7OoZapO1WlNTGJN37Vz9C6mALpApb3O_1zCF6RN94PkDeGRhAH5IJSg/exec"</code> đã dán đường dẫn Web App (kết thúc bằng /exec) chưa? Máy học sinh chỉ gửi được khi có dòng này.</li><li>Trong Apps Script đã dán <b>Code.gs mới</b> và bấm <b>Triển khai → Quản lý các bản triển khai → bút chì → Phiên bản mới → Triển khai</b> chưa? Bản cũ sẽ nhận dữ liệu nhưng không trả về được.</li><li>Học sinh chỉ gửi kết quả sau khi <b>hoàn thành ít nhất một ải</b>.</li><li>Bấm “🧪 Gửi bản ghi thử” bên dưới: nếu sau vài giây hiện “Học sinh thử” thì đường truyền đã ổn, chỉ còn chờ học sinh chơi.</li></ul><div class="row"><button class="btn" onclick="sendTest()">🧪 Gửi bản ghi thử</button><button class="btn o" onclick="openTest()">🔗 Mở thử kết nối</button></div></div>`}
+else{
+const cards=`<div class="tc"><div class="sc"><span class="sn">${pl}${sz?'<small>/'+sz+'</small>':''}</span> em<div class="mut">đã chơi${sz?` (${Math.round(pl/sz*100)}% ${cl.length} lớp)`:' · hãy nhập sĩ số từng lớp'}</div></div><div class="sc"><span class="sn">${fin.length}</span> em<div class="mut">đã đi hết cả 4/4 ải</div></div><div class="sc"><span class="sn">${fm(avg)}<small>/10</small></span><div class="mut">điểm trung bình các em đã hoàn thành</div></div><div class="sc"><span class="sn">${best?fm(best.score):'–'}<small>/10</small></span><div class="mut">điểm cao nhất${best?' · '+esc(best.name):''}</div></div><div class="sc"><span class="sn">${qs.toLocaleString('vi-VN')}</span><div class="mut">câu hỏi các em đã tự làm</div></div></div>`;
+const bands=[['Tốt (≥ 8)','t1',r=>r.score>=8],['Khá (6,5 – <8)','t2',r=>r.score>=6.5&&r.score<8],['Đạt (5 – <6,5)','t3',r=>r.score>=5&&r.score<6.5],['Chưa đạt (<5)','t4',r=>r.score<5]];
 const dist=`<div class="row" style="margin:6px 0">${bands.map(([n,c,f])=>`<span class="tag ${c}">${n}: ${fin.filter(f).length} em</span>`).join('')}<span class="mut">(tính trên các em đã hoàn thành 4 ải)</span></div>`;
-const cc=`<div class="tc">${cl.map(c=>{const s=A.filter(r=>r.className==c),f=s.filter(done),a=f.length?f.reduce((t,r)=>t+sc(r),0)/f.length:0,z=+SZ[c]||0,q=s.reduce((t,r)=>t+nq(r),0),i=CLS.indexOf(c);return`<div class="sc w" style="border-top-color:${col(c)}"><span class="sn" style="font-size:1.4rem;color:var(--ink)">${esc(c)}</span> <b>${s.length}${z?'/'+z:''} em</b> đã chơi · ${q} câu<div class="bar"><i style="width:${z?Math.min(100,s.length/z*100):100}%;background:${col(c)}"></i></div><div>Điểm TB: <b class="pt">${f.length?fm(a):'–'}</b>/10 <span class="mut">(${f.length} em xong)</span></div><span class="mut">sĩ số <input type="number" min="0" style="width:4.5rem" value="${z||''}" onchange="setSz(${i},this.value)"></span></div>`}).join('')}</div>`;
-const rows=fl.filter(r=>!NQ||String(r.name).toLowerCase().includes(NQ.toLowerCase())).sort((a,b)=>sc(b)-sc(a)||(+b.xp||0)-(+a.xp||0));
-const tbl=`<div class="card wrap"><div class="row sp"><b>Điểm của từng học sinh</b><input id="nq" placeholder="Tìm theo tên…" value="${esc(NQ)}" oninput="setNq(this.value)"></div><table><tr><th>#</th><th>HỌ TÊN</th><th>LỚP</th><th>ẢI XONG</th><th>ĐÚNG /40</th><th>ĐIỂM CÂU HỎI /8</th><th>ĐIỂM THƯỞNG /2</th><th>TỔNG ĐIỂM /10</th><th>XẾP LOẠI</th></tr>${rows.map((r,i)=>{const k=rank(sc(r));return`<tr><td>${i+1}</td><td>${esc(r.name)}${done(r)?' 🏆':''}</td><td>${esc(r.className)}</td><td>${r.completedStages||0}/4</td><td>${r.totalCorrect40||0}</td><td>${fm(r.quizPoints)}</td><td>${fm(r.bonusPoints)}</td><td class="pt">${fm(r.total10)}${done(r)?'':' <span class="mut">(tạm tính)</span>'}</td><td><span class="tag ${k[1]}">${k[0]}</span></td></tr>`}).join('')||'<tr><td colspan="9">Chưa có dữ liệu.</td></tr>'}</table></div>`;
-const chart=cl.length?`<div class="card"><div class="row sp"><b>Bốn dạng bài, tính theo % câu làm sai</b><span>${cl.map(c=>`<span class="mut"><i class="dot" style="background:${col(c)}"></i>${esc(c)}</span>`).join('')}</span></div>${ord.map(d=>`<div class="row" style="align-items:flex-start;flex-wrap:nowrap;margin:8px 0"><div style="flex:0 0 36%;text-align:right;font-size:.85rem">${DN[d]}</div><div style="flex:1">${cl.map(c=>{const p=rt(A.filter(r=>r.className==c),d);return`<div class="gb"><span style="width:${Math.max(p,1)}%;background:${col(c)}"></span><b>${p}%</b></div>`}).join('')}</div></div>`).join('')}</div>`:'<div class="card">Chưa có dữ liệu. Khi học sinh chơi xong, kết quả sẽ tự hiện ở đây.</div>';
-const sup=`<div class="card wrap"><table><tr><th>DẠNG BÀI</th><th>CẦN HỖ TRỢ</th></tr>${ord.map(d=>{const n=fl.filter(r=>tot(r,d)>=3&&wr(r,d)>=2&&wr(r,d)/tot(r,d)>=.4);return`<tr><td>${DN[d]}<div class="mut">${rt(fl,d)}% câu sai · ${TIP[d]}</div></td><td>${n.length?n.map(r=>`<span class="chip">${esc(r.name)}</span>`).join(''):'—'}</td></tr>`}).join('')}</table></div>`;
-const weak=`<div class="card wrap"><table><tr><th>HỌC SINH</th><th>ĐIỂM</th><th>DẠNG YẾU NHẤT</th></tr>${fl.map(r=>`<tr><td>${esc(r.name)} (${esc(r.className)})</td><td><b>${fm(r.total10)}</b>/10</td><td>${weakest(r)}</td></tr>`).join('')}</table></div>`;
-$('#app').innerHTML=`<div class="row sp"><h1>👩‍🏫 Trang giáo viên · Ôn tập Chương 3</h1><div class="row">Lớp: <select onchange="CF=this.value;render()"><option value="">Tất cả</option>${CLS.map(c=>`<option ${c==CF?'selected':''}>${esc(c)}</option>`).join('')}</select><button class="btn" onclick="load()">⬇ Tải kết quả</button><button class="btn o" onclick="csv()">Xuất CSV (Excel)</button></div></div>
-<div class="mut">${ST?`<span class="${ST[0]=='⚠'?'err':''}">${esc(ST)}</span>`:TT?'Cập nhật lúc '+TT:''} · <label><input type="checkbox" ${AUTO?'checked':''} onchange="setAuto(this.checked)"> tự làm mới mỗi 60 giây</label></div>
-${cards}${dist}${cc}<h2>Bảng điểm và xếp hạng</h2>${tbl}<h2>Tỉ lệ làm sai theo dạng bài</h2>${chart}<h2>Dạng cả lớp sai nhiều nhất</h2>${sup}<h2>Dạng yếu nhất từng người</h2>${weak}
-<details ${url()?'':'open'}><summary><b>Cài đặt kết nối</b></summary><div class="card"><p class="mut">Đường dẫn Web App (Apps Script) và mật khẩu (đúng với MAT_KHAU trong Code.gs). Chỉ lưu trên máy này.</p><div class="row"><input id="gu" style="flex:1;min-width:240px" placeholder="https://script.google.com/macros/s/.../exec" value="${esc(url())}"><input id="gp" type="password" placeholder="Mật khẩu" value="${esc(ld('gv_pw',''))}"><button class="btn" onclick="saveCfg()">Lưu và tải</button></div></div></details>`}
+const cc=`<div class="tc">${cl.map(c=>{const s=A.filter(r=>r.cls==c),f=s.filter(r=>r.all),a=f.length?f.reduce((t,r)=>t+r.score,0)/f.length:0,z=+SZ[c]||0,q=s.reduce((t,r)=>t+nq(r),0),i=CLS.indexOf(c);return`<div class="sc w" style="border-top-color:${col(c)}"><span class="sn" style="font-size:1.4rem;color:var(--ink)">${esc(c)}</span> <b>${s.length}${z?'/'+z:''} em</b> đã chơi · ${q} câu<div class="bar"><i style="width:${z?Math.min(100,s.length/z*100):100}%;background:${col(c)}"></i></div><div>Điểm TB: <b class="pt">${f.length?fm(a):'–'}</b>/10 <span class="mut">(${f.length} em xong)</span></div><span class="mut">sĩ số <input type="number" min="0" style="width:4.5rem" value="${z||''}" onchange="setSz(${i},this.value)"></span></div>`}).join('')}</div>`;
+const rows=fl.filter(r=>!NQ||r.name.toLowerCase().includes(NQ.toLowerCase())).sort((a,b)=>b.score-a.score||b.xp-a.xp);
+const tbl=`<div class="card wrap"><div class="row sp"><b>Điểm của từng học sinh</b><input id="nq" placeholder="Tìm theo tên…" value="${esc(NQ)}" oninput="setNq(this.value)"></div><table><tr><th>#</th><th>HỌ TÊN</th><th>LỚP</th><th>ẢI XONG</th><th>ĐÚNG /40</th><th>CÂU HỎI + THƯỞNG</th><th>TỔNG ĐIỂM /10</th><th>XẾP LOẠI</th></tr>${rows.map((r,i)=>{const k=rank(r.score);return`<tr><td>${i+1}</td><td>${esc(r.name)}${r.all?' 🏆':''}</td><td>${esc(r.cls)}</td><td>${r.stages}/4</td><td>${r.c40==null?'–':r.c40}</td><td>${r.qp==null?'–':fm(r.qp)+' + '+fm(r.bp)}</td><td class="pt">${fm(r.score)}${r.all?'':' <span class="mut">(tạm tính)</span>'}</td><td><span class="tag ${k[1]}">${k[0]}</span></td></tr>`}).join('')||'<tr><td colspan="8">Không tìm thấy.</td></tr>'}</table></div>`;
+const chart=`<div class="card"><div class="row sp"><b>${D.length} dạng bài, tính theo % câu làm sai</b><span>${cl.map(c=>`<span class="mut"><i class="dot" style="background:${col(c)}"></i>${esc(c)}</span>`).join('')}</span></div>${ord.map(d=>`<div class="row" style="align-items:flex-start;flex-wrap:nowrap;margin:8px 0"><div style="flex:0 0 36%;text-align:right;font-size:.85rem">${DNn[d]}</div><div style="flex:1">${cl.map(c=>{const p=rt(A.filter(r=>r.cls==c),d);return`<div class="gb"><span style="width:${Math.max(p,1)}%;background:${col(c)}"></span><b>${p}%</b></div>`}).join('')}</div></div>`).join('')}</div>`;
+const sup=`<div class="card wrap"><table><tr><th>DẠNG BÀI</th><th>CẦN HỖ TRỢ</th></tr>${ord.map(d=>{const n=fl.filter(r=>tot(r,d)>=3&&wr(r,d)>=2&&wr(r,d)/tot(r,d)>=.4);return`<tr><td>${DNn[d]}<div class="mut">${rt(fl,d)}% câu sai · ${TIPn[d]}</div></td><td>${n.length?n.map(r=>`<span class="chip">${esc(r.name)}</span>`).join(''):'—'}</td></tr>`}).join('')}</table></div>`;
+const weak=`<div class="card wrap"><table><tr><th>HỌC SINH</th><th>ĐIỂM</th><th>DẠNG YẾU NHẤT</th></tr>${fl.map(r=>`<tr><td>${esc(r.name)} (${esc(r.cls)})</td><td><b>${fm(r.score)}</b>/10</td><td>${weakest(r)}</td></tr>`).join('')}</table></div>`;
+body=`${cards}${dist}${cc}<h2>Bảng điểm và xếp hạng</h2>${tbl}<h2>Tỉ lệ làm sai theo dạng bài</h2>${chart}<h2>Dạng cả lớp sai nhiều nhất</h2>${sup}<h2>Dạng yếu nhất từng người</h2>${weak}`}
+$('#app').innerHTML=`<div class="row sp"><h1>👩‍🏫 Trang giáo viên · Điểm và thống kê</h1><div class="row">Lớp: <select onchange="CF=this.value;render()"><option value="">Tất cả</option>${CLS.map(c=>`<option ${c==CF?'selected':''}>${esc(c)}</option>`).join('')}</select><button class="btn" onclick="load()">⬇ Tải kết quả</button><button class="btn o" onclick="csv()">Xuất CSV (Excel)</button></div></div>
+<div class="mut">${ST?`<span class="${ST[0]=='⚠'?'err':''}">${esc(ST)}</span>`:TT?'Cập nhật lúc '+TT+' · đã tải '+A.length+' học sinh':''} · <label><input type="checkbox" ${AUTO?'checked':''} onchange="setAuto(this.checked)"> tự làm mới mỗi 60 giây</label></div>
+${body}
+<details ${url()?'':'open'}><summary><b>Cài đặt kết nối</b></summary><div class="card"><p class="mut">Đường dẫn Web App (Apps Script) và mật khẩu (đúng với MAT_KHAU trong Code.gs). Chỉ lưu trên máy này.</p><div class="row"><input id="gu" style="flex:1;min-width:240px" placeholder="https://script.google.com/macros/s/.../exec" value="${esc(url())}"><input id="gp" type="password" placeholder="Mật khẩu" value="${esc(ld('gv_pw',''))}"><button class="btn" onclick="saveCfg()">Lưu và tải</button></div><div class="row" style="margin-top:8px"><button class="btn o" onclick="sendTest()">🧪 Gửi bản ghi thử</button><button class="btn o" onclick="openTest()">🔗 Mở thử kết nối</button></div></div></details>`}
 render();if(url())load();setAuto(AUTO);
 </script></body></html>
